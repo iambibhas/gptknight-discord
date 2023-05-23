@@ -26,24 +26,24 @@ async def on_message(message):
     print(message)
     print(message.content)
 
-    if re.search(r"(\d) days in (.+)", message.content):
+    if re.search(r"(\d) (day|night)s? in (.+)", message.content):
         # curl https://api.openai.com/v1/chat/completions   -H 'Content-Type: application/json'   -H 'Authorization: Bearer <foo>'   -d '{
         #   "model": "gpt-3.5-turbo",
         #   "messages": [{"role": "user", "content": "write a travel itinerary for wayanad for 3 nights"}]
         # }'
-        num, place = re.search(r"(\d) days in (.+)", message.content).groups()
-        if len(place) > 12:
+        num, day_or_night, place = re.search(r"(\d) (day|night)s? in (.+)", message.content).groups()
+        if len(place) > 12 or int(num) > 30:
             await message.channel.send("lol")
             return
 
-        filename = "{place}-{num}.txt".format(place=place, num=num)
+        filename = "{place}-{num}-{dorn}.txt".format(place=place, num=num, dorn=day_or_night)
         if os.path.isfile(filename):
             with open(filename, 'r') as f:
                 await message.channel.send(file=discord.File(f))
         else:
             r = requests.post("https://api.openai.com/v1/chat/completions", json={
             "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": "write a travel itinerary for {place} for {num} nights".format(place=place, num=num)}]
+            "messages": [{"role": "user", "content": "write a travel itinerary for {place} for {num} {dorn}s".format(place=place, num=num, dorn=day_or_night)}]
             }, headers={
                 'Content-Type': "application/json",
                 'Authorization': "Bearer {openai_token}".format(openai_token=config.get("OPENAI_TOKEN"))
