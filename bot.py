@@ -32,6 +32,10 @@ async def on_message(message):
         #   "messages": [{"role": "user", "content": "write a travel itinerary for wayanad for 3 nights"}]
         # }'
         num, place = re.search(r"(\d) days in (.+)", message.content).groups()
+        if len(place) > 12:
+            await message.channel.send("lol")
+            return
+
         filename = "{place}-{num}.txt".format(place=place, num=num)
         if os.path.isfile(filename):
             with open(filename, 'r') as f:
